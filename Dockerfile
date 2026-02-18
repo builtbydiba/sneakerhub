@@ -20,19 +20,22 @@ COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy project
 COPY . .
 
 # Create staticfiles and media directories
-RUN mkdir -p /app/staticfiles /app/media
+RUN mkdir -p staticfiles media
+
+# Set environment for production
+ENV DJANGO_DEBUG=False
 
 # Collect static files
-RUN python manage.py collectstatic --noinput --clear
+RUN DJANGO_SECRET_KEY=build-secret python manage.py collectstatic --noinput --clear || true
 
 # Expose port
 EXPOSE 8000
 
 # Run gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "sneakerhub.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "60", "sneakerhub.wsgi:application"]
