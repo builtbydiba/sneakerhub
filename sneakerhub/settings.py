@@ -1,1 +1,5 @@
-SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-secret")
+import os
+
+# Other settings...
+
+DEBUG = os.environ.get("DEBUG") == "True"
